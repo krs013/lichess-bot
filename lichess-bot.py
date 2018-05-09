@@ -114,7 +114,7 @@ def play_game(li, game_id, control_queue, engine_factory, user_profile, config):
     if type(auto_resign) == int:
         auto_resign = -abs(auto_resign)
     else:
-        auto_resign = -10000 if auto_resign else 0
+        auto_resign = -100000 if auto_resign else 0
     
     engine_cfg = config["engine"]
     polyglot_cfg = engine_cfg.get("polyglot", {})
