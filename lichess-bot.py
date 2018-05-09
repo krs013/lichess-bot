@@ -109,8 +109,12 @@ def play_game(li, game_id, control_queue, engine_factory, user_profile, config):
 
     print("+++ {}".format(game))
 
-    # Get autoresign threshold. 0=never, -x if in cfg, or -10000 for mate only
-    autoresign = -abs(config.get("autoresign", False) and 10000)
+    # Get autoresign threshold. 0=never, -x if in cfg, or -100000 for mate only
+    auto_resign = config.get("auto_resign", False)
+    if type(auto_resign) == int:
+        auto_resign = -abs(auto_resign)
+    else:
+        auto_resign = -10000 if auto_resign else 0
     
     engine_cfg = config["engine"]
     polyglot_cfg = engine_cfg.get("polyglot", {})
@@ -137,7 +141,8 @@ def play_game(li, game_id, control_queue, engine_factory, user_profile, config):
                     if best_move == None:
                         best_move = engine.search(board, upd["wtime"], upd["btime"], upd["winc"], upd["binc"])
                     engine_score = engine.engine.info_handlers[0].info["score"][1]
-                    if autoresign and ((engine_score.mate or 0) < 0 or (engine_score.cp or 0) < autoresign):
+                    # print(">>>", engine_score)
+                    if auto_resign and ((engine_score.mate or 0) < 0 or (engine_score.cp or 0) < auto_resign):
                         li.resign(game.id)
                     else:
                         li.make_move(game.id, best_move)

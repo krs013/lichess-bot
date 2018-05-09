@@ -36,6 +36,7 @@ engine:                      # engine settings
   silence_stderr: false      # some engines (yes you, leela) are very noisy
 
 abort_time: 20               # time to abort a game in seconds when there is no activity
+auto_resign: false           # false: never, true: mate only, number (e.g. 800): CP threshold
 
 challenge:                   # incoming challenges
   concurrency: 1             # number of games to play simultaneously
