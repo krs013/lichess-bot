@@ -23,7 +23,7 @@ try:
 except ImportError:
     from http.client import BadStatusLine as RemoteDisconnected
 
-__version__ = "1.0.0"
+__version__ = "1.0.0-resign"
 
 def upgrade_account(li):
     if li.upgrade_to_bot_account() is None:
@@ -109,6 +109,9 @@ def play_game(li, game_id, control_queue, engine_factory, user_profile, config):
 
     print("+++ {}".format(game))
 
+    # Get autoresign threshold. 0=never, -x if in cfg, or -10000 for mate only
+    autoresign = -abs(config.get("autoresign", False) and 10000)
+    
     engine_cfg = config["engine"]
     polyglot_cfg = engine_cfg.get("polyglot", {})
 
@@ -133,7 +136,11 @@ def play_game(li, game_id, control_queue, engine_factory, user_profile, config):
                         best_move = get_book_move(board, polyglot_cfg)
                     if best_move == None:
                         best_move = engine.search(board, upd["wtime"], upd["btime"], upd["winc"], upd["binc"])
-                    li.make_move(game.id, best_move)
+                    engine_score = engine.engine.info_handlers[0].info["score"][1]
+                    if autoresign and ((engine_score.mate or 0) < 0 or (engine_score.cp or 0) < autoresign):
+                        li.resign(game.id)
+                    else:
+                        li.make_move(game.id, best_move)
                     game.abort_in(config.get("abort_time", 20))
             elif u_type == "ping":
                 if game.should_abort_now():
